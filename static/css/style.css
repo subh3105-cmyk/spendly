@@ -7,13 +7,13 @@
     --ink-soft: #2d2d2d;
     --ink-muted: #6b6b6b;
     --ink-faint: #a0a0a0;
-    --paper: #f7f6f3;
-    --paper-warm: #f0ede6;
+    --paper: #fcfcfb;
+    --paper-warm: #f8f7f2;
     --paper-card: #ffffff;
-    --accent: #1a472a;
-    --accent-light: #e8f0eb;
-    --accent-2: #c17f24;
-    --accent-2-light: #fdf3e3;
+    --accent: #14532d;
+    --accent-light: #f0fdf4;
+    --accent-2: #b45309;
+    --accent-2-light: #fffbeb;
     --danger: #c0392b;
     --danger-light: #fdecea;
     --border: #e4e1da;
@@ -369,8 +369,153 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ------------------------------------------------------------------ */
-/* Auth pages                                                          */
+/* Section Headers                                                          */
 /* ------------------------------------------------------------------ */
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+}
+
+.section-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* How it works                                                             */
+/* ------------------------------------------------------------------ */
+
+.how-it-works {
+    padding: 6rem 2rem;
+    background: var(--paper);
+}
+
+.how-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+}
+
+.how-step {
+    text-align: center;
+}
+
+.how-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.how-step:hover .how-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.how-step-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+}
+
+.how-step-body {
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    line-height: 1.7;
+}
+
+/* ------------------------------------------------------------------ */
+/* Benefits section                                                        */
+/* ------------------------------------------------------------------ */
+
+.benefits {
+    padding: 6rem 2rem;
+    background: var(--paper-warm);
+    border-top: 1px solid var(--border);
+}
+
+.benefits-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.benefit-item {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--paper-card);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    transition: border-color 0.3s ease;
+}
+
+.benefit-item:hover {
+    border-color: var(--accent);
+}
+
+.benefit-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.benefit-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+}
+
+.benefit-body {
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ */
+/* Animations & Polish                                                     */
+/* ------------------------------------------------------------------ */
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.mock-card {
+    animation: float 6s ease-in-out infinite;
+}
+
+.feature-icon svg {
+    width: 24px;
+    height: 24px;
+}
 
 .auth-section {
     min-height: calc(100vh - 60px - 100px);
@@ -521,7 +666,7 @@ a { color: inherit; text-decoration: none; }
     .hero-actions { justify-content: center; }
     .hero-visual { display: none; }
 
-    .features-inner { grid-template-columns: 1fr; }
+    .how-grid, .features-inner, .benefits-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
