@@ -1,7 +1,9 @@
-from flask import Flask, render_template
-from database.db import init_db, seed_db
+from flask import Flask, render_template, request, redirect, url_for, flash
+from database.db import init_db, seed_db, create_user, get_user_by_email
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
+app.secret_key = "spendly_secret_key" # Required for flashing messages
 
 # Initialize database on startup
 with app.app_context():
@@ -28,8 +30,32 @@ def privacy():
     return render_template("privacy.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not name or not email or not password or not confirm_password:
+            flash("All fields are required.", "error")
+            return render_template("register.html")
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return render_template("register.html")
+
+        if get_user_by_email(email):
+            flash("An account with this email already exists.", "error")
+            return render_template("register.html")
+
+        hashed_password = generate_password_hash(password)
+        create_user(name, email, hashed_password)
+
+        flash("Registration successful! Please log in.", "success")
+        return redirect(url_for("login"))
+
     return render_template("register.html")
 
 
