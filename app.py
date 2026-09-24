@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from database.db import init_db, seed_db, create_user, get_user_by_email
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "spendly_secret_key" # Required for flashing messages
@@ -59,8 +59,26 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            flash("Please provide both email and password.", "error")
+            return render_template("login.html")
+
+        user = get_user_by_email(email)
+
+        if user and check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"]
+            flash("Login successful!", "success")
+            return redirect(url_for("profile"))
+        else:
+            flash("Invalid email or password.", "error")
+            return render_template("login.html")
+
     return render_template("login.html")
 
 
@@ -70,7 +88,9 @@ def login():
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.pop("user_id", None)
+    flash("You have been logged out.", "success")
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
