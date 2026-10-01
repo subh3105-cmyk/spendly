@@ -1,0 +1,79 @@
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.preset-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.preset-btn {
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: var(--paper-warm);
+    color: var(--ink-muted);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+    background: var(--border-soft);
+    color: var(--ink);
+}
+
+.preset-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.custom-range-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.custom-range-form input {
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: white;
+}
+
+.custom-range-form button {
+    padding: 0.4rem 1rem;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.custom-range-form button:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .preset-group {
+        justify-content: center;
+    }
+}
