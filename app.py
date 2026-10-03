@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from functools import wraps
+from datetime import datetime, date
 from database.db import init_db, seed_db, create_user, get_user_by_email
 from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 from werkzeug.security import generate_password_hash, check_password_hash
+from utils.date_utils import validate_date, get_profile_presets
 
 app = Flask(__name__)
 app.secret_key = "spendly_secret_key" # Required for flashing messages
@@ -121,20 +123,44 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    user = get_user_by_id(session["user_id"])
+    user_id = session["user_id"]
+    user = get_user_by_id(user_id)
 
-    stats = get_summary_stats(session["user_id"])
+    # Date filtering logic
+    date_from = request.args.get("date_from")
+    date_to = request.args.get("date_to")
 
-    transactions = get_recent_transactions(session["user_id"])
+    # Validate dates using utility
+    validated_from = validate_date(date_from)
+    validated_to = validate_date(date_to)
 
-    categories = get_category_breakdown(session["user_id"])
+    if validated_from and validated_to:
+        if validated_from > validated_to:
+            flash("Start date must be before end date.", "error")
+            validated_from = None
+            validated_to = None
+
+    # Fetch filtered data
+    stats = get_summary_stats(user_id, validated_from, validated_to)
+    transactions = get_recent_transactions(user_id, date_from=validated_from, date_to=validated_to)
+    categories = get_category_breakdown(user_id, validated_from, validated_to)
+
+    # Calculation for presets using utility
+    presets = get_profile_presets()
+
+    # Calculate total filtered spend for the template
+    total_filtered_spend = sum(cat["amount"] for cat in categories)
 
     return render_template(
         "profile.html",
         user=user,
         stats=stats,
         transactions=transactions,
-        categories=categories
+        categories=categories,
+        total_filtered_spend=total_filtered_spend,
+        date_from=validated_from,
+        date_to=validated_to,
+        presets=presets
     )
 
 

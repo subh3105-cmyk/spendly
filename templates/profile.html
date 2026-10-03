@@ -3,6 +3,7 @@
 {% block title %}My Profile - Spendly{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 <style>
     .profile-container {
         max-width: var(--max-width);
@@ -203,21 +204,46 @@
             <div class="user-meta">Member since {{ user.member_since }}</div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-box">
-                <span class="stat-label">Total Spent</span>
-                <span class="stat-value">{{ stats.total_spent }}</span>
-                <span class="stat-trend positive">↑ 12% from last month</span>
+        <div class="stats-column">
+            <div class="filter-bar">
+                <div class="preset-group">
+                    <a href="{{ url_for('profile') }}"
+                       class="preset-btn {{ 'active' if not date_from and not date_to }}">All Time</a>
+
+                    <a href="{{ url_for('profile', date_from=presets.this_month.from, date_to=presets.this_month.to) }}"
+                       class="preset-btn {{ 'active' if date_from == presets.this_month.from and date_to == presets.this_month.to }}">This Month</a>
+
+                    <a href="{{ url_for('profile', date_from=presets.last_3_months.from, date_to=presets.last_3_months.to) }}"
+                       class="preset-btn {{ 'active' if date_from == presets.last_3_months.from and date_to == presets.last_3_months.to }}">Last 3 Months</a>
+
+                    <a href="{{ url_for('profile', date_from=presets.last_6_months.from, date_to=presets.last_6_months.to) }}"
+                       class="preset-btn {{ 'active' if date_from == presets.last_6_months.from and date_to == presets.last_6_months.to }}">Last 6 Months</a>
+                </div>
+
+                <form class="custom-range-form" method="GET">
+                    <input type="date" name="date_from" value="{{ date_from or '' }}">
+                    <span>to</span>
+                    <input type="date" name="date_to" value="{{ date_to or '' }}">
+                    <button type="submit">Apply</button>
+                </form>
             </div>
-            <div class="stat-box">
-                <span class="stat-label">Transactions</span>
-                <span class="stat-value">{{ stats.transaction_count }}</span>
-                <span class="stat-trend">Average ₹297 / tx</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Top Category</span>
-                <span class="stat-value" style="font-size: 1.2rem;">{{ stats.top_category }}</span>
-                <span class="stat-trend">36% of total spend</span>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Total Spent</span>
+                    <span class="stat-value">₹{{ "%.2f"|format(stats.total_spent) }}</span>
+                    <span class="stat-trend positive">↑ 12% from last month</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Transactions</span>
+                    <span class="stat-value">{{ stats.transaction_count }}</span>
+                    <span class="stat-trend">Average ₹{{ "%.2f"|format(stats.total_spent / stats.transaction_count if stats.transaction_count > 0 else 0) }} / tx</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Top Category</span>
+                    <span class="stat-value" style="font-size: 1.2rem;">{{ stats.top_category }}</span>
+                    <span class="stat-trend">36% of total spend</span>
+                </div>
             </div>
         </div>
     </div>
@@ -247,7 +273,7 @@
                                     </span>
                                 </td>
                                 <td style="text-align: right; font-weight: 600; color: var(--ink);">
-                                    {{ tx.amount }}
+                                    ₹{{ "%.2f"|format(tx.amount) }}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -271,8 +297,16 @@
                     </div>
                     {% endfor %}
                     <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: center;">
-                        <div class="stat-value" style="font-size: 1.5rem; margin-bottom: 0.25rem;">₹12,450</div>
-                        <div class="user-email">Total for September</div>
+                        <div class="stat-value" style="font-size: 1.5rem; margin-bottom: 0.25rem;">₹{{ "%.2f"|format(total_filtered_spend) }}</div>
+                        <div class="user-email">
+                            {% if date_from and date_to %}
+                                Expenses from {{ date_from }} to {{ date_to }}
+                            {% elif not date_from and not date_to %}
+                                All Time Total
+                            {% else %}
+                                Filtered Total
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

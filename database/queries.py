@@ -22,32 +22,38 @@ def get_user_by_id(user_id):
             }
         return None
 
-def get_summary_stats(user_id):
+def _apply_date_filter(query, params, date_from, date_to):
+    """
+    Helper to append date BETWEEN clause and params if date bounds are provided.
+    """
+    if date_from and date_to:
+        query += " AND date BETWEEN ? AND ?"
+        params.extend([date_from, date_to])
+    return query, params
+
+def get_summary_stats(user_id, date_from=None, date_to=None):
     """
     Calculates total spent, transaction count, and identifies the top category.
     """
     with get_db() as conn:
         # Total and Count
-        stats = conn.execute(
-            "SELECT SUM(amount) as total, COUNT(*) as count FROM expenses WHERE user_id = ?",
-            (user_id,)
-        ).fetchone()
+        query = "SELECT SUM(amount) as total, COUNT(*) as count FROM expenses WHERE user_id = ?"
+        params = [user_id]
+        query, params = _apply_date_filter(query, params, date_from, date_to)
+
+        stats = conn.execute(query, tuple(params)).fetchone()
 
         total_spent = stats["total"] or 0.0
         transaction_count = stats["count"] or 0
 
         # Top Category
-        top_cat_row = conn.execute(
-            """
-            SELECT category FROM expenses
-            WHERE user_id = ?
-            GROUP BY category
-            ORDER BY SUM(amount) DESC
-            LIMIT 1
-            """,
-            (user_id,)
-        ).fetchone()
+        top_cat_query = "SELECT category FROM expenses WHERE user_id = ?"
+        top_params = [user_id]
+        top_cat_query, top_params = _apply_date_filter(top_cat_query, top_params, date_from, date_to)
 
+        top_cat_query += " GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1"
+
+        top_cat_row = conn.execute(top_cat_query, tuple(top_params)).fetchone()
         top_category = top_cat_row["category"] if top_cat_row else "—"
 
         return {
@@ -56,63 +62,48 @@ def get_summary_stats(user_id):
             "top_category": top_category
         }
 
-def get_recent_transactions(user_id, limit=10):
+def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
     """
     Fetches the most recent transactions for a user.
     """
     with get_db() as conn:
-        rows = conn.execute(
-            """
-            SELECT date, description, category, amount
-            FROM expenses
-            WHERE user_id = ?
-            ORDER BY date DESC, created_at DESC
-            LIMIT ?
-            """,
-            (user_id, limit)
-        ).fetchall()
+        query = "SELECT date, description, category, amount FROM expenses WHERE user_id = ?"
+        params = [user_id]
+        query, params = _apply_date_filter(query, params, date_from, date_to)
 
+        query += " ORDER BY date DESC, created_at DESC LIMIT ?"
+        params.append(limit)
+
+        rows = conn.execute(query, tuple(params)).fetchall()
         return [dict(row) for row in rows]
 
-def get_category_breakdown(user_id):
+def get_category_breakdown(user_id, date_from=None, date_to=None):
     """
     Fetches total spend per category and calculates percentages.
     """
     with get_db() as conn:
-        # Get totals per category
-        rows = conn.execute(
-            """
-            SELECT category as name, SUM(amount) as amount
-            FROM expenses
-            WHERE user_id = ?
-            GROUP BY category
-            ORDER BY amount DESC
-            """,
-            (user_id,)
-        ).fetchall()
+        query = "SELECT category as name, SUM(amount) as amount FROM expenses WHERE user_id = ?"
+        params = [user_id]
+        query, params = _apply_date_filter(query, params, date_from, date_to)
+
+        query += " GROUP BY category ORDER BY amount DESC"
+
+        rows = conn.execute(query, tuple(params)).fetchall()
 
         if not rows:
             return []
 
-        # Calculate total for percentages
         grand_total = sum(row["amount"] for row in rows)
         if grand_total == 0:
             return [{"name": row["name"], "amount": 0, "pct": 0} for row in rows]
 
         breakdown = []
         sum_pct = 0
-
         for i, row in enumerate(rows):
             pct = round((row["amount"] / grand_total) * 100)
-            # On the last item, adjust to ensure sum is exactly 100
             if i == len(rows) - 1:
                 pct = 100 - sum_pct
-
-            breakdown.append({
-                "name": row["name"],
-                "amount": row["amount"],
-                "pct": pct
-            })
+            breakdown.append({"name": row["name"], "amount": row["amount"], "pct": pct})
             sum_pct += pct
 
         return breakdown
