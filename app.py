@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from functools import wraps
 from datetime import datetime, date
 from database.db import init_db, seed_db, create_user, get_user_by_email
-from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown, get_expense_by_id, update_expense
+from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown, get_expense_by_id, update_expense, delete_expense_by_id
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils.date_utils import validate_date, get_profile_presets
 
@@ -216,9 +216,15 @@ def edit_expense(id):
     return render_template("edit_expense.html", expense=expense)
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
+@login_required
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    user_id = session["user_id"]
+    if delete_expense_by_id(id, user_id):
+        flash("Expense deleted successfully!", "success")
+    else:
+        flash("Expense not found or access denied.", "error")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":

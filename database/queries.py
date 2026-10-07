@@ -1,6 +1,18 @@
 from database.db import get_db
 from datetime import datetime
 
+def delete_expense_by_id(expense_id, user_id):
+    """
+    Deletes a specific expense record if it belongs to the given user.
+    """
+    with get_db() as conn:
+        cursor = conn.execute(
+            "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+            (expense_id, user_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+
 def get_user_by_id(user_id):
     """
     Fetches user details by ID and formats the member since date.
