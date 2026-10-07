@@ -67,7 +67,7 @@ def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
     Fetches the most recent transactions for a user.
     """
     with get_db() as conn:
-        query = "SELECT date, description, category, amount FROM expenses WHERE user_id = ?"
+        query = "SELECT id, date, description, category, amount FROM expenses WHERE user_id = ?"
         params = [user_id]
         query, params = _apply_date_filter(query, params, date_from, date_to)
 
@@ -76,6 +76,26 @@ def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
 
         rows = conn.execute(query, tuple(params)).fetchall()
         return [dict(row) for row in rows]
+
+def get_expense_by_id(expense_id):
+    """
+    Fetches a single expense by its ID.
+    """
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,)).fetchone()
+        return dict(row) if row else None
+
+def update_expense(expense_id, amount, category, date, description):
+    """
+    Updates an existing expense's details.
+    """
+    with get_db() as conn:
+        cursor = conn.execute(
+            "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? WHERE id = ?",
+            (amount, category, date, description, expense_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
 
 def get_category_breakdown(user_id, date_from=None, date_to=None):
     """

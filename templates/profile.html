@@ -105,6 +105,9 @@
         padding: 1rem;
         border-bottom: 1px solid var(--border);
     }
+    .tx-table th:last-child {
+        text-align: center;
+    }
 
     .tx-table td {
         padding: 1rem;
@@ -131,6 +134,21 @@
     .badge-food { background: #fff7ed; color: #c2410c; }
     .badge-utilities { background: #f0f9ff; color: #0369a1; }
     .badge-default { background: var(--border-soft); color: var(--ink-muted); }
+
+    .edit-link {
+        font-size: 0.8rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.2rem 0.5rem;
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    .edit-link:hover {
+        background: var(--accent);
+        color: white;
+    }
 
     /* Category Breakdown */
     .category-grid {
@@ -274,6 +292,9 @@
                                 </td>
                                 <td style="text-align: right; font-weight: 600; color: var(--ink);">
                                     ₹{{ "%.2f"|format(tx.amount) }}
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="{{ url_for('edit_expense', id=tx.id) }}" class="edit-link">Edit</a>
                                 </td>
                             </tr>
                             {% endfor %}
