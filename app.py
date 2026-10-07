@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from functools import wraps
 from datetime import datetime, date
 from database.db import init_db, seed_db, create_user, get_user_by_email
-from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
+from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown, get_expense_by_id, update_expense
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils.date_utils import validate_date, get_profile_presets
 
@@ -164,14 +164,56 @@ def profile():
     )
 
 
+@app.route("/analytics")
+@login_required
+def analytics():
+    return render_template("analytics.html")
+
+
 @app.route("/expenses/add")
 def add_expense():
     return "Add expense — coming in Step 7"
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    user_id = session["user_id"]
+    expense = get_expense_by_id(id)
+
+    if not expense or expense["user_id"] != user_id:
+        flash("Expense not found or access denied.", "error")
+        return redirect(url_for("profile"))
+
+    if request.method == "POST":
+        amount = request.form.get("amount")
+        category = request.form.get("category")
+        date_val = request.form.get("date")
+        description = request.form.get("description")
+
+        if not amount or not category or not date_val:
+            flash("Amount, category, and date are required.", "error")
+            return render_template("edit_expense.html", expense=expense)
+
+        validated_date = validate_date(date_val)
+        if not validated_date:
+            flash("Invalid date format. Please use YYYY-MM-DD.", "error")
+            return render_template("edit_expense.html", expense=expense)
+
+        try:
+            amount_float = float(amount)
+        except ValueError:
+            flash("Invalid amount. Please enter a number.", "error")
+            return render_template("edit_expense.html", expense=expense)
+
+        if update_expense(id, amount_float, category, validated_date, description):
+            flash("Expense updated successfully!", "success")
+            return redirect(url_for("profile"))
+        else:
+            flash("Failed to update expense.", "error")
+            return render_template("edit_expense.html", expense=expense)
+
+    return render_template("edit_expense.html", expense=expense)
 
 
 @app.route("/expenses/<int:id>/delete")

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Spendly{% endblock %}
+
+{% block head %}
+<style>
+    .analytics-coming-soon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 70vh;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: var(--accent-light);
+        color: var(--accent);
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-radius: 999px;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .analytics-hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        color: var(--ink);
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+    }
+
+    .analytics-description {
+        font-family: var(--font-body);
+        font-size: 1.25rem;
+        color: var(--ink-soft);
+        line-height: 1.6;
+        margin-bottom: 3rem;
+        max-width: 600px;
+    }
+
+    .visual-placeholder {
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 16 / 9;
+        background-color: var(--paper-warm);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .brand-icon-large {
+        font-size: 5rem;
+        color: var(--accent);
+        opacity: 0.5;
+    }
+
+    .back-link {
+        display: inline-block;
+        font-family: var(--font-body);
+        color: var(--ink);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        background-color: var(--paper-warm);
+        border-color: var(--ink);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-coming-soon">
+    <span class="badge">Coming Soon</span>
+    <h1 class="analytics-hero-title">Insightful Analytics, Coming Soon</h1>
+    <p class="analytics-description">
+        We're building a powerful set of tools to help you visualize your spending habits,
+        track trends over time, and optimize your finances with data-driven insights.
+    </p>
+
+    <div class="visual-placeholder">
+        <span class="brand-icon-large">◈</span>
+    </div>
+
+    <a href="{{ url_for('profile') }}" class="back-link">Back to Profile</a>
+</div>
+{% endblock %}
